@@ -449,12 +449,24 @@
         issuance protocol is identified by a [=digital credential/protocol
         identifier=]. See also section [[[#protocol-registry]]].
       </dd>
+      <dt>
+        Digital credential coordinator
+      </dt>
+      <dd>
+        See [=credential request coordinator=].
+      </dd>
+      <dt>
+        Digital credential client
+      </dt>
+      <dd>
+        See [=credential request client=].
+      </dd>
     </dl><!--
     // MARK: Credential Request Coordinator
     -->
-    <h3>
+    <h2>
       Credential Request Coordinator
-    </h3>
+    </h2>
     <p>
       The <dfn data-local-lt="coordinator" local-lt="coordinator">credential
       request coordinator</dfn> is a user-agent-defined component responsible
@@ -602,9 +614,9 @@
       [=credential request coordinator/interaction promise=] with |result|.
       </li>
     </ol>
-    <h4>
+    <h3>
       Abort the credential request
-    </h4>
+    </h3>
     <p>
       The <dfn data-dfn-for="credential request coordinator">abort the
       credential request</dfn> algorithm takes JavaScript value |reason:JavaScript Value|. When
@@ -631,9 +643,9 @@
       coordinator/idle=].
       </li>
     </ol>
-    <h3>
+    <h2>
       Credential request client
-    </h3>
+    </h2>
     <p>
       A <dfn data-local-lt="client">credential request client</dfn> is a
       user-agent-defined component responsible for managing the credential
@@ -667,9 +679,9 @@
         selected by the user that typically acts as the [=credential chooser=].
       </p>
     </aside>
-    <h4>
+    <h3>
       Dismiss credentials chooser
-    </h4>
+    </h3>
     <p>
       The <dfn data-dfn-for="credential request client">dismiss credentials
       chooser</dfn> algorithm is invoked to dismiss the [=credential chooser=].
@@ -687,9 +699,9 @@
         </aside>
       </li>
     </ol>
-    <h4>
+    <h3>
       Present credentials chooser
-    </h4>
+    </h3>
     <p>
       The <dfn data-dfn-for="credential request client">present credentials
       chooser</dfn> algorithm takes |requestData:request data struct|. When

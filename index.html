@@ -468,13 +468,12 @@
       Credential Request Coordinator
     </h2>
     <p>
-      The <dfn data-local-lt="coordinator" local-lt="coordinator">credential
-      request coordinator</dfn> is a user-agent-defined component responsible
-      for mediating [=digital credential=] interactions within a given
-      [=top-level traversable=]. It ensures that only one interaction is active
-      at any time across [=child navigables=], and it manages the state
-      transitions between different [=credential request
-      coordinator/interaction states=].
+      The <dfn data-local-lt="coordinator">credential request coordinator</dfn>
+      is a user-agent-defined component responsible for mediating [=digital
+      credential=] interactions within a given [=top-level traversable=]. It
+      ensures that only one interaction is active at any time across [=child
+      navigables=], and it manages the state transitions between different
+      [=credential request coordinator/interaction states=].
     </p>
     <p>
       Each [=top-level traversable=] has a single associated [=credential
@@ -619,8 +618,8 @@
     </h3>
     <p>
       The <dfn data-dfn-for="credential request coordinator">abort the
-      credential request</dfn> algorithm takes JavaScript value |reason:JavaScript Value|. When
-      invoked, run the following steps:
+      credential request</dfn> algorithm takes JavaScript value
+      |reason:JavaScript Value|. When invoked, run the following steps:
     </p>
     <ol class="algorithm">
       <li>Let |coordinator| be the [=credential request coordinator=]

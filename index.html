@@ -456,12 +456,13 @@
       Credential Request Coordinator
     </h3>
     <p>
-      The <dfn data-local-lt="coordinator">credential request coordinator</dfn>
-      is a user-agent-defined component responsible for mediating [=digital
-      credential=] interactions within a given [=top-level traversable=]. It
-      ensures that only one interaction is active at any time across [=child
-      navigables=], and it manages the state transitions between different
-      [=credential request coordinator/interaction states=].
+      The <dfn data-local-lt="coordinator" local-lt="coordinator">credential
+      request coordinator</dfn> is a user-agent-defined component responsible
+      for mediating [=digital credential=] interactions within a given
+      [=top-level traversable=]. It ensures that only one interaction is active
+      at any time across [=child navigables=], and it manages the state
+      transitions between different [=credential request
+      coordinator/interaction states=].
     </p>
     <p>
       Each [=top-level traversable=] has a single associated [=credential
@@ -474,12 +475,17 @@
       cancellation.
     </p>
     <p>
-      A [=credential request coordinator=] has an associated [=digital
-      credential client=], which it interacts with.
+      A [=credential request coordinator=] has an associated [=credential
+      request client=], which it interacts with.
     </p>
-    <h3>
+    <p>
+      If the [=top-level traversable=] is a destroyed, the user agent MUST
+      [=credential request coordinator/abort the credential request=] with an
+      {{InvalidStateError}} {{DOMException}}.
+    </p>
+    <h4>
       Interaction states
-    </h3>
+    </h4>
     <p>
       The [=credential request coordinator=] has a finite set of
       <dfn data-dfn-for="credential request coordinator">interaction
@@ -495,7 +501,7 @@
         No credential interaction is currently in progress.
       </dd>
       <dt>
-        <dfn data-dfn-for="credential request coordinator">ongoing</dfn>:
+        <dfn data-dfn-for="credential request coordinator">requesting</dfn>:
       </dt>
       <dd>
         A credential interaction is currently in progress and the user
@@ -516,22 +522,131 @@
       request coordinator/idle=] [=credential request coordinator/interaction
       state=].
     </p>
+    <h4>
+      Prepare credential requests
+    </h4>
+    <p>
+      The <dfn data-dfn-for="credential request coordinator">Prepare credential
+      requests</dfn> algorithm takes a |document:Document|,
+      |requests:sequence&lt;DigitalCredentialGetRequest&gt;|, and
+      |signal:AbortSignal?|. When invoked, run the following steps:
+    </p>
+    <p>
+      This algorithm relies on a <dfn>request data</dfn> [=struct=], which
+      consists of the following members:
+    </p>
+    <dl>
+      <dt>
+        <dfn data-dfn-for="request data">requests</dfn>
+      </dt>
+      <dd>
+        A [=sequence=] of [=digital credential/presentation requests=]
+        ({{DigitalCredentialCreateRequest}}) to be passed to the [=credential
+        request client=].
+      </dd>
+      <dt>
+        <dfn data-dfn-for="request data">topOrigin</dfn>
+      </dt>
+      <dd>
+        The [=Document/origin=] of the [=browsing context/top-level
+        traversable=]'s [=associated Document=].
+      </dd>
+      <dt>
+        <dfn data-dfn-for="request data">documentOrigin</dfn>
+      </dt>
+      <dd>
+        The [=origin=] of the [=Document=] that is making the request, which
+        can be same as the the [=request data/topOrigin=].
+      </dd>
+    </dl>
+    <ol class="algorithm">
+      <li>Let |coordinator| be |document|'s [=Document/browsing context=]'s
+      [=browsing context/top-level traversable=]'s [=credential request
+      coordinator=].
+      </li>
+      <li>If |coordinator|'s [=credential request coordinator/interaction
+      state=] is not [=credential request coordinator/idle=],
+      [=exception/throw=] a {{InvalidStateError}} {{DOMException}}.
+      </li>
+      <li>If |signal| was passed:
+        <ol>
+          <li>If |signal| is [=AbortSignal/aborted=], [=exception/throw=]
+          |signal|'s [=AbortSignal/abort reason=].
+          </li>
+          <li>[=Set/append=] |signal|'s abort algorithm with following step,
+          which take a |reason:JavaScript Value| as input:
+            <ol>
+              <li>[=credential request coordinator/Abort the credential
+              request=] of |coordinator| with |reason|.
+              </li>
+            </ol>
+          </li>
+        </ol>
+      </li>
+      <li>Set |coordinator|'s [=credential request coordinator/interaction
+      state=] to [=credential request coordinator/requesting=].
+      </li>
+      <li>Let |requestData| be a new [=request data=] [=struct=] with the
+      [=request data/requests=] set to |requests|, the [=request
+      data/topOrigin=] set to |document|'s [=browsing context/top-level
+      traversable=]'s [=Document/origin=], and the [=request
+      data/documentOrigin=] set to |document|'s [=Document/origin=].
+      </li>
+      <li>Let |client| be |coordinator|'s associated [=credential request
+      client=].
+      </li>
+      <li>Run |client|'s [=credential request client/present credentials
+      chooser=] algorithm with |requestData| and await its |result|.
+      </li>
+      <li>If |slaresult| is a [=digital credential=], resolve |coordinator|'s
+      [=credential request coordinator/interaction promise=] with |result|.
+      </li>
+    </ol>
+    <h4>
+      Abort the credential request
+    </h4>
+    <p>
+      The <dfn data-dfn-for="credential request coordinator">abort the
+      credential request</dfn> algorithm takes JavaScript value |reason:JavaScript Value|. When
+      invoked, run the following steps:
+    </p>
+    <ol class="algorithm">
+      <li>Let |coordinator| be the [=credential request coordinator=]
+      associated with the [=browsing context/top-level traversable=].
+      </li>
+      <li>Assert: |coordinator|'s [=credential request coordinator/interaction
+      state=] is [=credential request coordinator/requesting=].
+      </li>
+      <li>Set |coordinator|'s [=credential request coordinator/interaction
+      state=] to [=credential request coordinator/aborting=].
+      </li>
+      <li>Let |client| be |coordinator|'s associated [=credential request
+      client=].
+      </li>
+      <li>Run |client|'s [=credential request client/dismiss credentials
+      chooser=] algorithm and await its completion.
+      </li>
+      <li>Queue a global task Set |coordinator|'s [=credential request
+      coordinator/interaction state=] to [=credential request
+      coordinator/idle=].
+      </li>
+    </ol>
     <h3>
-      Digital Credential Client
+      Credential request client
     </h3>
     <p>
-      A <dfn>digital credential client</dfn> is a user-agent-defined component
-      responsible for managing the credential presentation or issuance flow,
-      which includes allowing the user to select from available [=holders=] and
-      coordinating the request.
+      A <dfn data-local-lt="client">credential request client</dfn> is a
+      user-agent-defined component responsible for managing the credential
+      presentation or issuance flow, which includes allowing the user to select
+      from available [=holders=] and coordinating the request.
     </p>
     <p>
       Each [=credential request coordinator=] uses a single associated
-      [=digital credential client=] to fulfill credential presentation and
+      [=credential request client=] to fulfill credential presentation and
       issuance operations.
     </p>
     <p>
-      The [=digital credential client=]:
+      The [=credential request client=]:
     </p>
     <ul>
       <li>Validates and transforms presentation or issuance inputs and outputs.
@@ -547,11 +662,39 @@
     </ul>
     <aside class="note">
       <p>
-        Although the [=digital credential client=] coordinates the credential
-        interaction, it is the selected [=holder=] that typically acts as the
-        [=credential chooser=].
+        Although the [=credential request client=] coordinates the user
+        interaction with respect to inputs and outputs, it is the [=holder=]
+        selected by the user that typically acts as the [=credential chooser=].
       </p>
     </aside>
+    <h4>
+      Dismiss credentials chooser
+    </h4>
+    <p>
+      The <dfn data-dfn-for="credential request client">dismiss credentials
+      chooser</dfn> algorithm is invoked to dismiss the [=credential chooser=].
+      When invoked, run the following steps:
+    </p>
+    <ol class="algorithm">
+      <li>Tear down the [=credential chooser=]'s UI.
+        <aside class="note" title="Dismissal of the credential chooser">
+          <p>
+            Dismissing the [=credential chooser=] often involves closing the
+            dialog or popup, which can, for example, be animated and take some
+            time to complete. How the dismissal is implemented is up to the
+            user agent.
+          </p>
+        </aside>
+      </li>
+    </ol>
+    <h4>
+      Present credentials chooser
+    </h4>
+    <p>
+      The <dfn data-dfn-for="credential request client">present credentials
+      chooser</dfn> algorithm takes |requestData:request data struct|. When
+      invoked, run the following steps:
+    </p>
     <h2>
       Scope
     </h2>
